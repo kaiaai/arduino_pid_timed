@@ -13,7 +13,7 @@ double Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
 double Kp=2, Ki=5, Kd=1;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, 0.01, DIRECT); // 10 msec default sampling rate
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, 0.03, DIRECT); // 30 msec target average sampling rate
 
 void setup()
 {
