@@ -1,8 +1,7 @@
 /**********************************************************************************************
- * Arduino PID Library - Version 1.2.1
- * by Brett Beauregard <br3ttb@gmail.com> brettbeauregard.com
- *
- * This Library is licensed under the MIT License
+ * Arduino PID Timed Library
+ * Based on https://github.com/br3ttb/Arduino-PID-Library
+ * This Library is licensed under a GPLv3 License
  **********************************************************************************************/
 
 #if ARDUINO >= 100
@@ -11,14 +10,14 @@
   #include "WProgram.h"
 #endif
 
-#include <PID_v1.h>
+#include <PID_Timed.h>
 
 /*Constructor (...)*********************************************************
  *    The parameters specified here are those for for which we can't set up
  *    reliable defaults, so we need to have the user set them.
  ***************************************************************************/
 PID::PID(double* Input, double* Output, double* Setpoint,
-        double Kp, double Ki, double Kd, int POn, int ControllerDirection)
+        double Kp, double Ki, double Kd, double referenceSampleTime, int POn, int ControllerDirection)
 {
     myOutput = Output;
     myInput = Input;
@@ -28,12 +27,12 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     PID::SetOutputLimits(0, 255);				//default output limit corresponds to
 												//the arduino pwm limits
 
-    SampleTime = 100;							//default Controller Sample Time is 0.1 seconds
+    ReferenceSampleTime = referenceSampleTime;
 
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd, POn);
 
-    lastTime = millis()-SampleTime;
+    //lastTime = millis()-SampleTime;
 }
 
 /*Constructor (...)*********************************************************
@@ -42,8 +41,8 @@ PID::PID(double* Input, double* Output, double* Setpoint,
  ***************************************************************************/
 
 PID::PID(double* Input, double* Output, double* Setpoint,
-        double Kp, double Ki, double Kd, int ControllerDirection)
-    :PID::PID(Input, Output, Setpoint, Kp, Ki, Kd, P_ON_E, ControllerDirection)
+        double Kp, double Ki, double Kd, double referenceSampleTime, int ControllerDirection)
+    :PID::PID(Input, Output, Setpoint, Kp, Ki, Kd, referenceSampleTime, P_ON_E, ControllerDirection)
 {
 
 }
@@ -55,43 +54,47 @@ PID::PID(double* Input, double* Output, double* Setpoint,
  *   pid Output needs to be computed.  returns true when the output is computed,
  *   false when nothing has been done.
  **********************************************************************************/
-bool PID::Compute()
+bool PID::Compute(double SampleTime)
 {
-   if(!inAuto) return false;
-   unsigned long now = millis();
-   unsigned long timeChange = (now - lastTime);
-   if(timeChange>=SampleTime)
-   {
-      /*Compute all the working error variables*/
-      double input = *myInput;
-      double error = *mySetpoint - input;
-      double dInput = (input - lastInput);
-      outputSum+= (ki * error);
+  if(!inAuto) return false;
+   
+  double ratio  = SampleTime / ReferenceSampleTime;
+  ki = dispKi * ratio;
+  kd = dispKd / ratio;
+   
+  /*Compute all the working error variables*/
+  double input = *myInput;
+  double error = *mySetpoint - input;
+  double dInput = (input - lastInput);
+  outputSum+= (ki * error);
 
-      /*Add Proportional on Measurement, if P_ON_M is specified*/
-      if(!pOnE) outputSum-= kp * dInput;
+  /*Add Proportional on Measurement, if P_ON_M is specified*/
+  if(!pOnE) outputSum-= kp * dInput;
 
-      if(outputSum > outMax) outputSum= outMax;
-      else if(outputSum < outMin) outputSum= outMin;
+  if(outputSum > outMax) outputSum= outMax;
+  else if(outputSum < outMin) outputSum= outMin;
 
-      /*Add Proportional on Error, if P_ON_E is specified*/
-	   double output;
-      if(pOnE) output = kp * error;
-      else output = 0;
+  /*Add Proportional on Error, if P_ON_E is specified*/
+  double output;
+  if(pOnE) output = kp * error;
+  else output = 0;
 
-      /*Compute Rest of PID Output*/
-      output += outputSum - kd * dInput;
+  /*Compute Rest of PID Output*/
+  output += outputSum - kd * dInput;
 
-	    if(output > outMax) output = outMax;
-      else if(output < outMin) output = outMin;
-	    *myOutput = output;
+  if(output > outMax) output = outMax;
+  else if(output < outMin) output = outMin;
+  *myOutput = output;
 
-      /*Remember some variables for next time*/
-      lastInput = input;
-      lastTime = now;
-	    return true;
-   }
-   else return false;
+  /*Remember some variables for next time*/
+  lastInput = input;
+  //lastTime = now;
+  return true;
+}
+
+void PID::clearErrorIntegral() {
+  outputSum = 0;
+  lastInput = *myInput;
 }
 
 /* SetTunings(...)*************************************************************
@@ -106,12 +109,12 @@ void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
    pOn = POn;
    pOnE = POn == P_ON_E;
 
-   dispKp = Kp; dispKi = Ki; dispKd = Kd;
+   //dispKp = Kp; dispKi = Ki; dispKd = Kd;
 
-   double SampleTimeInSec = ((double)SampleTime)/1000;
+   //double SampleTimeInSec = ((double)SampleTime)/1e6;
    kp = Kp;
-   ki = Ki * SampleTimeInSec;
-   kd = Kd / SampleTimeInSec;
+   ki = Ki; // * SampleTimeInSec;
+   kd = Kd; // / SampleTimeInSec;
 
   if(controllerDirection ==REVERSE)
    {
@@ -119,6 +122,7 @@ void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
       ki = (0 - ki);
       kd = (0 - kd);
    }
+   dispKp = kp; dispKi = ki; dispKd = kd;
 }
 
 /* SetTunings(...)*************************************************************
@@ -131,16 +135,9 @@ void PID::SetTunings(double Kp, double Ki, double Kd){
 /* SetSampleTime(...) *********************************************************
  * sets the period, in Milliseconds, at which the calculation is performed
  ******************************************************************************/
-void PID::SetSampleTime(int NewSampleTime)
+void PID::SetReferenceSampleTime(double SampleTime)
 {
-   if (NewSampleTime > 0)
-   {
-      double ratio  = (double)NewSampleTime
-                      / (double)SampleTime;
-      ki *= ratio;
-      kd /= ratio;
-      SampleTime = (unsigned long)NewSampleTime;
-   }
+  ReferenceSampleTime = SampleTime;
 }
 
 /* SetOutputLimits(...)****************************************************
@@ -172,14 +169,14 @@ void PID::SetOutputLimits(double Min, double Max)
  * when the transition from manual to auto occurs, the controller is
  * automatically initialized
  ******************************************************************************/
-void PID::SetMode(int Mode)
+//void PID::SetMode(int Mode)
+void PID::enable(bool en)
 {
-    bool newAuto = (Mode == AUTOMATIC);
-    if(newAuto && !inAuto)
+    if(en && !inAuto)
     {  /*we just went from manual to auto*/
         PID::Initialize();
     }
-    inAuto = newAuto;
+    inAuto = en;
 }
 
 /* Initialize()****************************************************************
@@ -219,6 +216,7 @@ void PID::SetControllerDirection(int Direction)
 double PID::GetKp(){ return  dispKp; }
 double PID::GetKi(){ return  dispKi;}
 double PID::GetKd(){ return  dispKd;}
-int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
+bool PID::isEnabled(){ return inAuto;}
 int PID::GetDirection(){ return controllerDirection;}
-
+//double PID::GetErrorIntegral() { return outputSum;}
+//double PID::GetLastInput() { return lastInput;}

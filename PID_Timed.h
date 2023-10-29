@@ -1,6 +1,6 @@
-#ifndef PID_v1_h
-#define PID_v1_h
-#define LIBRARY_VERSION	1.2.1
+#ifndef PID_Timed_h
+#define PID_Timed_h
+#define LIBRARY_VERSION	1.1.1
 
 class PID
 {
@@ -9,8 +9,8 @@ class PID
   public:
 
   //Constants used in some of the functions below
-  #define AUTOMATIC	1
-  #define MANUAL	0
+  //#define AUTOMATIC	1
+  //#define MANUAL	0
   #define DIRECT  0
   #define REVERSE  1
   #define P_ON_M 0
@@ -18,15 +18,15 @@ class PID
 
   //commonly used functions **************************************************************************
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
-        double, double, double, int, int);//   Setpoint.  Initial tuning parameters are also set here.
+        double, double, double, double, int, int);//   Setpoint.  Initial tuning parameters are also set here.
                                           //   (overload for specifying proportional mode)
 
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
-        double, double, double, int);     //   Setpoint.  Initial tuning parameters are also set here
+        double, double, double, double, int);     //   Setpoint.  Initial tuning parameters are also set here
 	
-    void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
+    void enable(bool en);                 // * true Auto, false Manual
 
-    bool Compute();                       // * performs the PID calculation.  it should be
+    bool Compute(double SampleTimeSec);   // * performs the PID calculation.  it should be
                                           //   called every time loop() cycles. ON/OFF and
                                           //   calculation frequency can be set using SetMode
                                           //   SetSampleTime respectively
@@ -48,17 +48,18 @@ class PID
 										  //   means the output will increase when error is positive. REVERSE
 										  //   means the opposite.  it's very unlikely that this will be needed
 										  //   once it is set in the constructor.
-    void SetSampleTime(int);              // * sets the frequency, in Milliseconds, with which 
+  void SetReferenceSampleTime(double);    // * sets the frequency, in Milliseconds, with which 
                                           //   the PID calculation is performed.  default is 100
-										  
-										  
-										  
+  void clearErrorIntegral();            // zero out integral of error
+                      
   //Display functions ****************************************************************
 	double GetKp();						  // These functions query the pid for interal values.
 	double GetKi();						  //  they were created mainly for the pid front-end,
 	double GetKd();						  // where it's important to know what is actually 
-	int GetMode();						  //  inside the PID.
+	bool isEnabled();						  // true Auto, false Manual
 	int GetDirection();					  //
+    //double GetErrorIntegral();
+    //double GetLastInput();
 
   private:
 	void Initialize();
@@ -79,12 +80,11 @@ class PID
     double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
                                   //   what these values are.  with pointers we'll just know.
 			  
-	unsigned long lastTime;
+	//unsigned long lastTime;
 	double outputSum, lastInput;
 
-	unsigned long SampleTime;
+	double ReferenceSampleTime;
 	double outMin, outMax;
 	bool inAuto, pOnE;
 };
 #endif
-
