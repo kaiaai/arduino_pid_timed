@@ -6,13 +6,33 @@ adapted to work when time between samples is not constant.
 
 ## Example
 ```
-my_pid = new PID(&measured_value, &knob_to_adjust, &target_value, kp, ki, kd, PID_DEFAULT_UPDATE_PERIOD, PID_MODE, DIRECT);
+#define PID_DEFAULT_UPDATE_PERIOD_SEC 0.01  // 10 msec
+
+double Kp=2, Ki=5, Kd=1;
+double Target_Value, Measured_Value, Controlled_by_PID;
+Target_Value = 100;
+
+PID pid(&Measured_Value, &Controled_by_PID, &Target_Value, Kp, Ki, Kd,
+  PID_DEFAULT_UPDATE_PERIOD_SEC, DIRECT);
 pid->SetOutputLimits(-1, 1);
 
-pid->Compute(0.15); // 150msec elapsed since last sample
-pid->Compute(0.18); // 180msec elapsed since last sample
-pid->Compute(0.07); // 70msec elapsed since last sample
+Measured_Value = get_measured_value();
+delay(150);
+pid.Compute(0.15); // 150msec elapsed since last sample
 
-my_pid->enable(false); // freeze PID
-my_pid->enable(true); // unfreeze PID
+Measured_Value = get_measured_value();
+delay(180);
+pid.Compute(0.18); // 180msec elapsed since last sample
+
+Measured_Value = get_measured_value();
+delay(70);
+pid.Compute(0.07); // 70msec elapsed since last sample
+
+pid.enable(false); // freeze PID
+
+Measured_Value = get_measured_value();
+delay(100);
+pid.Compute(0.1); // No effect
+
+pid.enable(true); // unfreeze PID
 ```
