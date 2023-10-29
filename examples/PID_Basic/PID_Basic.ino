@@ -32,7 +32,18 @@ void setup()
 
 void loop()
 {
+  delay(10);
   Input = analogRead(PIN_INPUT);
-  myPID.Compute(0.01);  // Specify the actual time elapsed since last myPID.Compute()
+  myPID.Compute(0.01);  // 10 msec elapsed since last sample
+  analogWrite(PIN_OUTPUT, Output);
+
+  delay(50);
+  Input = analogRead(PIN_INPUT);
+  myPID.Compute(0.05);  // 50 msec elapsed since last sample
+  analogWrite(PIN_OUTPUT, Output);
+
+  delay(35);
+  Input = analogRead(PIN_INPUT);
+  myPID.Compute(0.035);  // 35 msec elapsed since last sample
   analogWrite(PIN_OUTPUT, Output);
 }
