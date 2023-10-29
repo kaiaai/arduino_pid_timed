@@ -9,8 +9,6 @@ class PID
   public:
 
   //Constants used in some of the functions below
-  //#define AUTOMATIC	1
-  //#define MANUAL	0
   #define DIRECT  0
   #define REVERSE  1
   #define P_ON_M 0
@@ -27,13 +25,11 @@ class PID
     void enable(bool en);                 // * true Auto, false Manual
 
     bool Compute(double SampleTimeSec);   // * performs the PID calculation.  it should be
-                                          //   called every time loop() cycles. ON/OFF and
-                                          //   calculation frequency can be set using SetMode
-                                          //   SetSampleTime respectively
+                                          //   called every time loop() cycles
 
     void SetOutputLimits(double, double); // * clamps the output to a specific range. 0-255 by default, but
-										                      //   it's likely the user will want to change this depending on
-										                      //   the application
+					 //   it's likely the user will want to change this depending on
+					//   the application
 	
 
 
@@ -45,9 +41,9 @@ class PID
                     double, int);         	  
 
 	void SetControllerDirection(int);	  // * Sets the Direction, or "Action" of the controller. DIRECT
-										  //   means the output will increase when error is positive. REVERSE
-										  //   means the opposite.  it's very unlikely that this will be needed
-										  //   once it is set in the constructor.
+						//   means the output will increase when error is positive. REVERSE
+						//   means the opposite.  it's very unlikely that this will be needed
+						//   once it is set in the constructor.
   void SetReferenceSampleTime(double);    // * sets the frequency, in Milliseconds, with which 
                                           //   the PID calculation is performed.  default is 100
   void clearErrorIntegral();            // zero out integral of error
@@ -56,10 +52,8 @@ class PID
 	double GetKp();						  // These functions query the pid for interal values.
 	double GetKi();						  //  they were created mainly for the pid front-end,
 	double GetKd();						  // where it's important to know what is actually 
-	bool isEnabled();						  // true Auto, false Manual
+	bool isEnabled();						  // Pause, unpause calculations
 	int GetDirection();					  //
-    //double GetErrorIntegral();
-    //double GetLastInput();
 
   private:
 	void Initialize();
