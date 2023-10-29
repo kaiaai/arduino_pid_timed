@@ -6,33 +6,50 @@ adapted to work when time between samples is not constant.
 
 ## Example
 ```
-#define PID_DEFAULT_UPDATE_PERIOD_SEC 0.01  // 10 msec
+/********************************************************
+ * PID Basic Example
+ * Reading analog input 0 to control analog PWM output 3
+ ********************************************************/
 
+#include <PID_Timed.h>
+
+#define PIN_INPUT 0
+#define PIN_OUTPUT 3
+
+//Define Variables we'll be connecting to
+double Setpoint, Input, Output;
+
+//Specify the links and initial tuning parameters
 double Kp=2, Ki=5, Kd=1;
-double Target_Value, Measured_Value, Controlled_by_PID;
-Target_Value = 100;
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, 0.03, DIRECT); // 30 msec target average sampling rate
 
-PID pid(&Measured_Value, &Controled_by_PID, &Target_Value, Kp, Ki, Kd,
-  PID_DEFAULT_UPDATE_PERIOD_SEC, DIRECT);
-pid->SetOutputLimits(-1, 1);
+void setup()
+{
+  //initialize the variables we're linked to
+  Input = analogRead(PIN_INPUT);
+  Setpoint = 100;
 
-Measured_Value = get_measured_value();
-delay(150);
-pid.Compute(0.15); // 150msec elapsed since last sample
+  // Set PID output limits if necessary
+  // myPID.SetOutputLimits(-1, 1);
+  
+  myPID.enable(true);
+}
 
-Measured_Value = get_measured_value();
-delay(180);
-pid.Compute(0.18); // 180msec elapsed since last sample
+void loop()
+{
+  delay(10);
+  Input = analogRead(PIN_INPUT);
+  myPID.Compute(0.01);  // 10 msec elapsed since last sample
+  analogWrite(PIN_OUTPUT, Output);
 
-Measured_Value = get_measured_value();
-delay(70);
-pid.Compute(0.07); // 70msec elapsed since last sample
+  delay(50);
+  Input = analogRead(PIN_INPUT);
+  myPID.Compute(0.05);  // 50 msec elapsed since last sample
+  analogWrite(PIN_OUTPUT, Output);
 
-pid.enable(false); // freeze PID
-
-Measured_Value = get_measured_value();
-delay(100);
-pid.Compute(0.1); // No effect
-
-pid.enable(true); // unfreeze PID
+  delay(35);
+  Input = analogRead(PIN_INPUT);
+  myPID.Compute(0.035);  // 35 msec elapsed since last sample
+  analogWrite(PIN_OUTPUT, Output);
+}
 ```
