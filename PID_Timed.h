@@ -1,5 +1,4 @@
-#ifndef PID_Timed_h
-#define PID_Timed_h
+#pragma once
 #define LIBRARY_VERSION	1.1.1
 
 class PID
@@ -9,10 +8,14 @@ class PID
   public:
 
   //Constants used in some of the functions below
-  #define DIRECT  0
-  #define REVERSE  1
-  #define P_ON_M 0
-  #define P_ON_E 1
+  //#define DIRECT  0
+  //#define REVERSE  1
+  //#define P_ON_M 0
+  //#define P_ON_E 1
+	static const int8_t DIRECT = 0;
+	static const int8_t REVERSE = 1;
+	static const int8_t P_ON_M = 0;
+	static const int8_t P_ON_E = 1;
 
   //commonly used functions **************************************************************************
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
@@ -81,4 +84,3 @@ class PID
 	double outMin, outMax;
 	bool inAuto, pOnE;
 };
-#endif
