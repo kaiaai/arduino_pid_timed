@@ -54,9 +54,13 @@ void loop()
 }
 ```
 ## Relese notes
+
+v1.1.2
+- PID() empty no-arguments constructor with Init() to follow
+  - convenient when instantiating PID like a static variable and configuring later
+
 v1.1.1
 - float option
-- PID() empty constructor with Init() to follow
 
 v1.1.0
 - breaking change: moved `#define` to class constants
