@@ -53,3 +53,12 @@ void loop()
   analogWrite(PIN_OUTPUT, Output);
 }
 ```
+## Relese notes
+v1.1.1
+- float option
+
+v1.0.0
+- breaking change: moved `#define` to class constants
+
+v1.0.1
+- initial release
