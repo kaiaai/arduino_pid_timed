@@ -56,6 +56,7 @@ void loop()
 ## Relese notes
 v1.1.1
 - float option
+- PID() empty constructor with Init() to follow
 
 v1.0.0
 - breaking change: moved `#define` to class constants

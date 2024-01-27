@@ -10,6 +10,8 @@ public:
 	static const int8_t P_ON_M = 0;
 	static const int8_t P_ON_E = 1;
 
+  PID(); // Call init
+
   // Constructor. Links the PID to the Input, Output, and 
   // Setpoint. Initial tuning parameters are also set here.
   // (overload for specifying proportional mode)
@@ -18,6 +20,8 @@ public:
   // Constructor. Links the PID to the Input, Output, and
   // Setpoint. Initial tuning parameters are also set here.
   PID(double*, double*, double*, double, double, double, double, int);
+
+  void Init(double*, double*, double*, double, double, double, double, int, int);
 
   // true Auto, false Manual
   void enable(bool en);

@@ -23,6 +23,9 @@ GetKi	KEYWORD2
 GetKd	KEYWORD2
 GetMode	KEYWORD2
 GetDirection	KEYWORD2
+Init	KEYWORD2
+isEnabled	KEYWORD2
+enable	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

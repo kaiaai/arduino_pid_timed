@@ -4,10 +4,24 @@
 
 #include <PID_Timed.h>
 
+PID::PID() {}
+
 PID::PID(double* Input, double* Output, double* Setpoint,
   double Kp, double Ki, double Kd, double referenceSampleTime,
   int POn, int ControllerDirection)
 {
+  Init(Input, Output, Setpoint, Kp, Ki, Kd, referenceSampleTime, POn, ControllerDirection);
+}
+
+PID::PID(double* Input, double* Output, double* Setpoint,
+  double Kp, double Ki, double Kd, double referenceSampleTime, int ControllerDirection)
+  :PID::PID(Input, Output, Setpoint, Kp, Ki, Kd, referenceSampleTime, P_ON_E, ControllerDirection)
+{
+}
+
+void PID::Init(double* Input, double* Output, double* Setpoint,
+  double Kp, double Ki, double Kd, double referenceSampleTime,
+  int POn, int ControllerDirection) {
   myOutput = Output;
   myInput = Input;
   mySetpoint = Setpoint;
@@ -20,12 +34,6 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 
   PID::SetControllerDirection(ControllerDirection);
   PID::SetTunings(Kp, Ki, Kd, POn);
-}
-
-PID::PID(double* Input, double* Output, double* Setpoint,
-  double Kp, double Ki, double Kd, double referenceSampleTime, int ControllerDirection)
-  :PID::PID(Input, Output, Setpoint, Kp, Ki, Kd, referenceSampleTime, P_ON_E, ControllerDirection)
-{
 }
 
 // This, as they say, is where the magic happens.  this function should be called
