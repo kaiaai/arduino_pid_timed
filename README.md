@@ -55,6 +55,9 @@ void loop()
 ```
 ## Relese notes
 
+v1.1.3
+- moved *.h, *.cpp into src folder
+
 v1.1.2
 - PID() empty no-arguments constructor with Init() to follow
   - convenient when instantiating PID like a static variable and configuring later
