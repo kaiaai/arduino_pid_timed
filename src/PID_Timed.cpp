@@ -86,7 +86,6 @@ void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
 {
   if (Kp<0 || Ki<0 || Kd<0) return;
 
-  pOn = POn;
   pOnE = POn == P_ON_E;
 
   kp = Kp;
@@ -103,7 +102,7 @@ void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
 }
 
 void PID::SetTunings(double Kp, double Ki, double Kd) {
-  SetTunings(Kp, Ki, Kd, pOn); 
+  SetTunings(Kp, Ki, Kd, pOnE ? P_ON_E : P_ON_M); 
 }
 
 void PID::SetReferenceSampleTime(double SampleTime)
@@ -168,13 +167,28 @@ void PID::SetControllerDirection(int Direction)
 double PID::GetKp() { return  dispKp; }
 double PID::GetKi() { return  dispKi; }
 double PID::GetKd() { return  dispKd; }
+bool PID::isOnError() { return pOnE; }
 bool PID::isEnabled() { return inAuto; }
 int PID::GetDirection() { return controllerDirection; }
+
+PID_FLOAT::PID_FLOAT() {}
 
 PID_FLOAT::PID_FLOAT(float* Input, float* Output, float* Setpoint,
   float Kp, float Ki, float Kd, float referenceSampleTime,
   int POn, int ControllerDirection)
 {
+  Init(Input, Output, Setpoint, Kp, Ki, Kd, referenceSampleTime, POn, ControllerDirection);
+}
+
+PID_FLOAT::PID_FLOAT(float* Input, float* Output, float* Setpoint,
+  float Kp, float Ki, float Kd, float referenceSampleTime, int ControllerDirection)
+  :PID_FLOAT::PID_FLOAT(Input, Output, Setpoint, Kp, Ki, Kd, referenceSampleTime, P_ON_E, ControllerDirection)
+{
+}
+
+void PID_FLOAT::Init(float* Input, float* Output, float* Setpoint,
+  float Kp, float Ki, float Kd, float referenceSampleTime,
+  int POn, int ControllerDirection) {
   myOutput = Output;
   myInput = Input;
   mySetpoint = Setpoint;
@@ -187,12 +201,6 @@ PID_FLOAT::PID_FLOAT(float* Input, float* Output, float* Setpoint,
 
   PID_FLOAT::SetControllerDirection(ControllerDirection);
   PID_FLOAT::SetTunings(Kp, Ki, Kd, POn);
-}
-
-PID_FLOAT::PID_FLOAT(float* Input, float* Output, float* Setpoint,
-  float Kp, float Ki, float Kd, float referenceSampleTime, int ControllerDirection)
-  :PID_FLOAT::PID_FLOAT(Input, Output, Setpoint, Kp, Ki, Kd, referenceSampleTime, P_ON_E, ControllerDirection)
-{
 }
 
 // This, as they say, is where the magic happens.  this function should be called
@@ -245,7 +253,6 @@ void PID_FLOAT::SetTunings(float Kp, float Ki, float Kd, int POn)
 {
   if (Kp<0 || Ki<0 || Kd<0) return;
 
-  pOn = POn;
   pOnE = POn == P_ON_E;
 
   kp = Kp;
@@ -262,7 +269,7 @@ void PID_FLOAT::SetTunings(float Kp, float Ki, float Kd, int POn)
 }
 
 void PID_FLOAT::SetTunings(float Kp, float Ki, float Kd) {
-  SetTunings(Kp, Ki, Kd, pOn); 
+  SetTunings(Kp, Ki, Kd, pOnE ? P_ON_E : P_ON_M); 
 }
 
 void PID_FLOAT::SetReferenceSampleTime(float SampleTime)
@@ -327,5 +334,6 @@ void PID_FLOAT::SetControllerDirection(int Direction)
 float PID_FLOAT::GetKp() { return  dispKp; }
 float PID_FLOAT::GetKi() { return  dispKi; }
 float PID_FLOAT::GetKd() { return  dispKd; }
+bool PID_FLOAT::isOnError() { return pOnE; }
 bool PID_FLOAT::isEnabled() { return inAuto; }
 int PID_FLOAT::GetDirection() { return controllerDirection; }

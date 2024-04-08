@@ -57,6 +57,7 @@ public:
   double GetKp();
   double GetKi();
   double GetKd();
+  bool isOnError();
   bool isEnabled(); // Pause, unpause calculations
   int GetDirection();
 
@@ -72,7 +73,6 @@ private:
   double kd; // (D)erivative Tuning Parameter
 
 	int controllerDirection;
-	int pOn;
 
   // Pointers to the Input, Output, and Setpoint variables
   //   This creates a hard link between the variables and the 
@@ -98,6 +98,8 @@ public:
 	static const int8_t P_ON_M = 0;
 	static const int8_t P_ON_E = 1;
 
+  PID_FLOAT(); // Call init
+
   // Constructor. Links the PID to the Input, Output, and 
   // Setpoint. Initial tuning parameters are also set here.
   // (overload for specifying proportional mode)
@@ -106,6 +108,8 @@ public:
   // Constructor. Links the PID to the Input, Output, and
   // Setpoint. Initial tuning parameters are also set here.
   PID_FLOAT(float*, float*, float*, float, float, float, float, int);
+
+  void Init(float*, float*, float*, float, float, float, float, int, int);
 
   // true Auto, false Manual
   void enable(bool en);
@@ -141,6 +145,7 @@ public:
   float GetKp();
   float GetKi();
   float GetKd();
+  bool isOnError();
   bool isEnabled(); // Pause, unpause calculations
   int GetDirection();
 
@@ -156,7 +161,6 @@ private:
   float kd; // (D)erivative Tuning Parameter
 
 	int controllerDirection;
-	int pOn;
 
   // Pointers to the Input, Output, and Setpoint variables
   //   This creates a hard link between the variables and the 
